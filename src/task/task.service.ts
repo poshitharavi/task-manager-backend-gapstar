@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NewTaskDto } from './dtos/new-task.dto';
 import { Priority, Recurrence, Task } from '@prisma/client';
-import { calculateNextRecurrence } from 'src/common/util/recurrence.utils';
+import { calculateNextRecurrence } from '../common/util/recurrence.utils';
 import { UpdateTaskDto } from './dtos/update-task.dto';
 import { MyTaskResponse } from './interface/my-tasks.interface';
 
