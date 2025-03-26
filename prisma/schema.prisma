@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  userName  String   @unique
+  name      String
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tasks     Task[]
+}
+
+model Task {
+  id             Int              @id @default(autoincrement())
+  title          String
+  status         TaskStatus       @default(NOT_DONE)
+  dueDate        DateTime
+  priority       Priority
+  recurrence     Recurrence       @default(NONE)
+  nextRecurrence DateTime?
+  active         Boolean          @default(true)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  userId         Int
+  user           User             @relation(fields: [userId], references: [id])
+  dependencies   TaskDependency[] @relation("DependentTasks")
+  requiredBy     TaskDependency[] @relation("PrerequisiteTasks")
+}
+
+model TaskDependency {
+  id             Int  @id @default(autoincrement())
+  dependentId    Int
+  prerequisiteId Int
+  dependent      Task @relation("DependentTasks", fields: [dependentId], references: [id])
+  prerequisite   Task @relation("PrerequisiteTasks", fields: [prerequisiteId], references: [id])
+
+  @@unique([dependentId, prerequisiteId]) // Prevent duplicate dependencies
+}
+
+enum TaskStatus {
+  DONE
+  NOT_DONE
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum Recurrence {
+  DAILY
+  WEEKLY
+  MONTHLY
+  NONE
+}
