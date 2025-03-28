@@ -7,9 +7,11 @@ import { AuthGuard } from './common/guard/auth.guard';
 import { JwtModule } from '@nestjs/jwt';
 import { PrismaModule } from './prisma/prisma.module';
 import { TaskModule } from './task/task.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     UserModule,
     PrismaModule,
     JwtModule.register({
