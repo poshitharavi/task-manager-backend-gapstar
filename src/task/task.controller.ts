@@ -10,6 +10,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   Req,
   Res,
 } from '@nestjs/common';
@@ -152,11 +153,19 @@ export class TaskController {
   async getMyTasks(
     @Req() request: any,
     @Res() response: Response,
+    @Query('sortBy') sortBy?: string,
+    @Query('sortOrder') sortOrder: 'asc' | 'desc' = 'asc',
+    @Query('title') title?: string,
   ): Promise<any> {
     try {
       const { user } = request;
 
-      const tasks = await this.taskService.getMyTasks(user.sub);
+      const tasks = await this.taskService.getMyTasks(
+        user.sub,
+        sortBy,
+        sortOrder,
+        title,
+      );
 
       return response.status(StatusCodes.OK).json({
         statusCode: StatusCodes.OK,

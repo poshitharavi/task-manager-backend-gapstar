@@ -150,12 +150,33 @@ export class TaskService {
     }
   }
 
-  async getMyTasks(userId: number): Promise<MyTaskResponse> {
+  async getMyTasks(
+    userId: number,
+    sortBy?: string,
+    sortOrder: 'asc' | 'desc' = 'asc',
+    title?: string,
+  ): Promise<MyTaskResponse> {
+    const where: any = {
+      active: true,
+      userId,
+    };
+
+    if (title) {
+      where.title = {
+        contains: title,
+        mode: 'insensitive', // Perform case-insensitive search
+      };
+    }
+
+    const orderBy = {};
+    if (sortBy) {
+      orderBy[sortBy] = sortOrder;
+    } else {
+      orderBy['id'] = 'asc';
+    }
+
     const tasks = await this.prisma.task.findMany({
-      where: {
-        active: true,
-        userId,
-      },
+      where,
       include: {
         dependencies: {
           include: {
@@ -163,9 +184,7 @@ export class TaskService {
           },
         },
       },
-      orderBy: {
-        id: 'asc',
-      },
+      orderBy: [orderBy],
     });
 
     const activeTaskCount = await this.prisma.task.count({
