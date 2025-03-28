@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NewTaskDto } from './dtos/new-task.dto';
 import { Priority, Recurrence, Task, TaskStatus } from '@prisma/client';
@@ -153,7 +157,14 @@ export class TaskService {
         userId,
       },
       include: {
-        dependencies: true,
+        dependencies: {
+          include: {
+            prerequisite: true,
+          },
+        },
+      },
+      orderBy: {
+        id: 'asc',
       },
     });
 
@@ -178,5 +189,49 @@ export class TaskService {
         completed: completedTaskCount,
       },
     };
+  }
+
+  async updateStatus(taskId: number, userId: number): Promise<boolean> {
+    try {
+      const task = await this.prisma.task.findUniqueOrThrow({
+        where: {
+          id: taskId,
+          active: true,
+          userId,
+        },
+        include: {
+          dependencies: {
+            include: {
+              prerequisite: true,
+            },
+          },
+        },
+      });
+
+      if (task.status === 'NOT_DONE' && task.dependencies.length > 0) {
+        if (task.dependencies[0].prerequisite.status === 'NOT_DONE')
+          throw new ConflictException(
+            'Task has a dependency that is not completed',
+          );
+      }
+
+      await this.prisma.task.update({
+        where: {
+          id: taskId,
+        },
+        data: {
+          status: task.status === 'NOT_DONE' ? 'DONE' : 'NOT_DONE',
+        },
+      });
+
+      return true;
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException(`Task with id ${taskId} not found`);
+      }
+
+      // throw error if any
+      throw error;
+    }
   }
 }
