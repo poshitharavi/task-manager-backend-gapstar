@@ -162,7 +162,7 @@ export class TaskController {
         statusCode: StatusCodes.OK,
         message: 'Successfully retrieved all tasks',
         body: {
-          tasks,
+          ...tasks,
         },
       });
     } catch (error) {

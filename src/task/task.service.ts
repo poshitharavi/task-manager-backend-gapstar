@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NewTaskDto } from './dtos/new-task.dto';
-import { Priority, Recurrence, Task } from '@prisma/client';
+import { Priority, Recurrence, Task, TaskStatus } from '@prisma/client';
 import { calculateNextRecurrence } from '../common/util/recurrence.utils';
 import { UpdateTaskDto } from './dtos/update-task.dto';
 import { MyTaskResponse } from './interface/my-tasks.interface';
@@ -146,7 +146,7 @@ export class TaskService {
     }
   }
 
-  async getMyTasks(userId: number): Promise<MyTaskResponse[]> {
+  async getMyTasks(userId: number): Promise<MyTaskResponse> {
     const tasks = await this.prisma.task.findMany({
       where: {
         active: true,
@@ -157,6 +157,26 @@ export class TaskService {
       },
     });
 
-    return tasks;
+    const activeTaskCount = await this.prisma.task.count({
+      where: {
+        active: true,
+        userId,
+      },
+    });
+
+    const completedTaskCount = await this.prisma.task.count({
+      where: {
+        status: TaskStatus.DONE,
+        userId,
+      },
+    });
+
+    return {
+      tasks,
+      counts: {
+        active: activeTaskCount,
+        completed: completedTaskCount,
+      },
+    };
   }
 }

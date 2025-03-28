@@ -6,7 +6,7 @@ interface TaskDependency {
   prerequisiteId: number;
 }
 
-export interface MyTaskResponse {
+export interface Task {
   id: number;
   title: string;
   status: TaskStatus;
@@ -19,4 +19,14 @@ export interface MyTaskResponse {
   updatedAt: Date | string;
   userId: number;
   dependencies: TaskDependency[];
+}
+
+interface TaskCounts {
+  active: number;
+  completed: number;
+}
+
+export interface MyTaskResponse {
+  tasks: Task[];
+  counts: TaskCounts;
 }

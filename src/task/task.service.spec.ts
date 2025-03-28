@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TaskService } from './task.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { NewTaskDto } from './dtos/new-task.dto';
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import * as recurrenceUtils from '../../src/common/util/recurrence.utils';
 import { UpdateTaskDto } from './dtos/update-task.dto';
 
